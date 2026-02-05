@@ -24,13 +24,13 @@ new Vue({
         search: '',
         courseSearch: '',
         loading: false,
-        form: { student_id: '', name: '', email: '', course: '' },
+        form: { student_id: '', name: '', email: '', program: '' },
         courseForm: { course_code: '', course_name: '', credits: '' },
         headers: [
             { text: 'ID', value: 'student_id', width: '100px' },
             { text: 'Name', value: 'name' },
             { text: 'Email', value: 'email' },
-            { text: 'course', value: 'course' },
+            { text: 'Program', value: 'program' },
             { text: 'Actions', value: 'actions', sortable: false, align: 'end' }
         ],
         courseHeaders: [
@@ -96,7 +96,7 @@ new Vue({
                 if(data.success) {
                     this.showSnackbar('Student added successfully', 'success');
                     this.dialog = false;
-                    this.form = { student_id: '', name: '', email: '', course: '' };
+                    this.form = { student_id: '', name: '', email: '', program: '' };
                     this.fetchStudents();
                 } else {
                     this.showSnackbar(data.message || 'Error creating student', 'error');
