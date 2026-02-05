@@ -62,18 +62,16 @@ if ($row['count'] == 0) {
 
 // ============================================
 // AWS DEPLOYMENT - MySQL RDS 
-// When migrating to AWS:
-// 1. Comment out the entire LOCAL TESTING section above
-// 2. Uncomment this section below
-// 3. Update the RDS endpoint and credentials
+// Uses environment variables for security
+// Set these in /etc/httpd/conf.d/env_vars.conf or user-data script
 // ============================================
 
 $db_type = 'mysql'; // Set database type
 
-$db_host = "your-rds-endpoint.rds.amazonaws.com";
-$db_user = "admin";
-$db_pass = "your-password";
-$db_name = "studentdb";
+$db_host = getenv('DB_HOST') ?: "your-rds-endpoint.rds.amazonaws.com";
+$db_user = getenv('DB_USER') ?: "admin";
+$db_pass = getenv('DB_PASSWORD') ?: "your-password";
+$db_name = getenv('DB_NAME') ?: "studentdb";
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
