@@ -47,7 +47,9 @@ A lightweight Vue/Vuetify + PHP/MySQL application for managing student records a
 ## AWS Deployment (EC2)
 
 ```bash
+#!/bin/bash
 # Install Git, Apache & PHP
+sudo yum update -y
 sudo yum install -y git httpd php php-mysqli php-pdo
 
 # Start Apache
@@ -56,13 +58,21 @@ sudo systemctl enable httpd
 
 # Clone/pull project from git
 cd /var/www/html
-sudo git clone <your-repo-url> .
+sudo git clone https://github.com/rygan-1220/student-information-system .
 
-# Set environment variables for RDS
-export DB_HOST="your-rds-endpoint.rds.amazonaws.com"
-export DB_NAME="studentdb"
-export DB_USER="admin"
-export DB_PASSWORD="yourpassword"
+# Configure Apache environment variables
+cat > /etc/httpd/conf.d/env_vars.conf << 'EOF'
+SetEnv DB_HOST "student-db.cbh0nppcfvsl.us-east-1.rds.amazonaws.com"
+SetEnv DB_NAME "studentdb"
+SetEnv DB_USER "admin"
+SetEnv DB_PASSWORD "StudentInfoAdmin#123"
+EOF
+
+# Allow Apache to connect to external database (SELinux)
+sudo setsebool -P httpd_can_network_connect_db 1
+
+# Restart Apache
+sudo systemctl restart httpd
 ```
 
 ## API Endpoints
