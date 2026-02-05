@@ -4,6 +4,7 @@
 // ============================================
 // LOCAL TESTING - MySQL with WAMP (CURRENTLY ACTIVE)
 // ============================================
+/*
 $db_type = 'mysql'; // Set database type
 
 $db_host = "localhost";
@@ -57,7 +58,7 @@ if ($row['count'] == 0) {
         ('CS401', 'Cloud Computing', 3),
         ('CS501', 'Machine Learning', 4)");
 }
-
+*/
 
 // ============================================
 // AWS DEPLOYMENT - MySQL RDS 
@@ -66,13 +67,13 @@ if ($row['count'] == 0) {
 // 2. Uncomment this section below
 // 3. Update the RDS endpoint and credentials
 // ============================================
-/*
+
 $db_type = 'mysql'; // Set database type
 
-$db_host = getenv('DB_HOST') ?: "your-rds-endpoint.rds.amazonaws.com";
-$db_user = getenv('DB_USER') ?: "admin";
-$db_pass = getenv('DB_PASSWORD') ?: "your-password";
-$db_name = getenv('DB_NAME') ?: "studentdb";
+$db_host = "your-rds-endpoint.rds.amazonaws.com";
+$db_user = "admin";
+$db_pass = "your-password";
+$db_name = "studentdb";
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
@@ -120,6 +121,5 @@ if ($row['count'] == 0) {
         ('CS401', 'Cloud Computing', 3),
         ('CS501', 'Machine Learning', 4)");
 }
-*/
 
 ?>
