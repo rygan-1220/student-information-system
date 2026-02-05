@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'RDS Database for Student Info Application'
+
+Parameters:
+  DbInstanceClass:
+    Type: String
+    Default: db.t3.micro
+    Description: Database instance class
+  
+  DbName:
+    Type: String
+    Default: studentdb
+    Description: Database name
+  
+  DbUsername:
+    Type: String
+    Default: admin
+    NoEcho: true
+    Description: Database master username
+  
+  DbPassword:
+    Type: String
+    NoEcho: true
+    Description: Database master password
+    MinLength: 8
+  
+  PrivateDbSubnetAz1Id:
+    Type: String
+    Description: Private DB Subnet AZ1 ID
+    Default: 'subnet-xxx'
+  
+  PrivateDbSubnetAz2Id:
+    Type: String
+    Description: Private DB Subnet AZ2 ID
+    Default: 'subnet-xxx'
+  
+  RdsSecurityGroupId:
+    Type: String
+    Description: RDS Security Group ID
+    Default: 'sg-xxx'
+
+Resources:
+  # DB Subnet Group
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: student-db-subnet-group
+      DBSubnetGroupDescription: Subnet group for RDS database
+      SubnetIds:
+        - !Ref PrivateDbSubnetAz1Id
+        - !Ref PrivateDbSubnetAz2Id
+      Tags:
+        - Key: Name
+          Value: student-db-subnet-group
+
+  # RDS MySQL Instance
+  StudentDatabase:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    Properties:
+      DBInstanceIdentifier: student-db
+      Engine: mysql
+      EngineVersion: '8.4.7'
+      DBInstanceClass: !Ref DbInstanceClass
+      AllocatedStorage: '20'
+      StorageType: gp2
+      StorageEncrypted: true
+      DBName: !Ref DbName
+      MasterUsername: !Ref DbUsername
+      MasterUserPassword: !Ref DbPassword
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref RdsSecurityGroupId
+      MultiAZ: false
+      BackupRetentionPeriod: 0
+      PubliclyAccessible: false
+      DeletionProtection: false
+      Tags:
+        - Key: Name
+          Value: student-database
+
+Outputs:
+  DatabaseEndpoint:
+    Description: RDS Database Endpoint
+    Value: !GetAtt StudentDatabase.Endpoint.Address
+    Export:
+      Name: RdsDatabaseEndpoint
+
+  DatabasePort:
+    Description: RDS Database Port
+    Value: !GetAtt StudentDatabase.Endpoint.Port
+    Export:
+      Name: RdsDatabasePort
+
+  DatabaseName:
+    Description: RDS Database Name
+    Value: !Ref DbName
+    Export:
+      Name: RdsDatabaseName

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Information System</title>
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.7.1/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .v-application { font-family: 'Roboto', sans-serif; }
+        .rounded-card { border-radius: 8px !important; }
+        .v-btn--rounded { border-radius: 28px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <v-app>
+            <!-- Navigation Drawer -->
+            <v-navigation-drawer app permanent color="white" width="260" elevation="1">
+                <div class="d-flex align-center pa-4 pl-6">
+                    <v-avatar color="primary" size="40" class="mr-3">
+                        <v-icon color="white">mdi-school</v-icon>
+                    </v-avatar>
+                    <div>
+                        <div class="text-h6 font-weight-bold">StudentPortal</div>
+                        <div class="text-caption grey--text">Admin Dashboard</div>
+                    </div>
+                </div>
+
+                <v-divider></v-divider>
+
+                <v-list nav dense class="mt-4 px-4">
+                    <v-list-item-group v-model="selectedItem" color="primary">
+                        <v-list-item class="mb-2 rounded-lg">
+                            <v-list-item-icon>
+                                <v-icon>mdi-view-dashboard</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-content>
+                                <v-list-item-title class="font-weight-medium">Dashboard</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item class="mb-2 rounded-lg">
+                            <v-list-item-icon>
+                                <v-icon>mdi-account-group</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-content>
+                                <v-list-item-title class="font-weight-medium">Students</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item class="mb-2 rounded-lg">
+                            <v-list-item-icon>
+                                <v-icon>mdi-book</v-icon>
+                            </v-list-item-icon>
+                            <v-list-item-content>
+                                <v-list-item-title class="font-weight-medium">Courses</v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list-item-group>
+                </v-list>
+                
+                <template v-slot:append>
+                    <div class="pa-4">
+                        <v-btn block color="error" text large>
+                            <v-icon left>mdi-logout</v-icon> Logout
+                        </v-btn>
+                    </div>
+                </template>
+            </v-navigation-drawer>
+
+            <!-- App Bar -->
+            <v-app-bar app color="white" elevation="0" style="border-bottom: 1px solid #e0e0e0 !important; height: 64px;">
+                <v-app-bar-nav-icon class="d-md-none"></v-app-bar-nav-icon>
+                <v-toolbar-title class="font-weight-bold text-h6 ml-2">
+                    {{ selectedItem === 0 ? 'Dashboard Overview' : selectedItem === 1 ? 'Student Management' : 'Course Management' }}
+                </v-toolbar-title>
+                <v-spacer></v-spacer>
+                <div class="d-flex align-center mr-4">
+                    <v-btn icon class="mr-2">
+                        <v-icon>mdi-bell-outline</v-icon>
+                    </v-btn>
+                    <v-avatar color="grey lighten-4" size="40" class="mr-3">
+                        <v-icon color="primary">mdi-account</v-icon>
+                    </v-avatar>
+                    <div class="d-none d-sm-block text-right">
+                        <div class="subtitle-2 font-weight-bold black--text mb-0">Administrator</div>
+                        <div class="caption grey--text mt-0">admin@mmu.edu.my</div>
+                    </div>
+                </div>
+            </v-app-bar>
+
+            <!-- Main Content -->
+            <v-main class="grey lighten-4">
+                <v-container class="pa-6" fluid>
+                    <!-- Dashboard Page -->
+                    <div v-if="selectedItem === 0">
+                        <!-- Stats Row -->
+                        <v-row class="mb-4">
+                        <v-col cols="12" sm="6" md="4">
+                            <v-card class="rounded-card pa-2" elevation="0">
+                                <v-list-item three-line>
+                                    <v-list-item-content>
+                                        <div class="overline mb-4 grey--text">Total Students</div>
+                                        <v-list-item-title class="text-h4 font-weight-bold primary--text mb-1">
+                                            {{ students.length }}
+                                        </v-list-item-title>
+                                    </v-list-item-content>
+                                    <v-list-item-avatar tile size="80" color="blue lighten-5" class="rounded-lg">
+                                        <v-icon x-large color="primary">mdi-account-school</v-icon>
+                                    </v-list-item-avatar>
+                                </v-list-item>
+                            </v-card>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-card class="rounded-card pa-2" elevation="0">
+                                <v-list-item three-line>
+                                    <v-list-item-content>
+                                        <div class="overline mb-4 grey--text">Active Course</div>
+                                        <v-list-item-title class="text-h4 font-weight-bold info--text mb-1">
+                                            {{ courses.length }}
+                                        </v-list-item-title>
+                                    </v-list-item-content>
+                                    <v-list-item-avatar tile size="80" color="light-blue lighten-5" class="rounded-lg">
+                                        <v-icon x-large color="info">mdi-book-open-page-variant</v-icon>
+                                    </v-list-item-avatar>
+                                </v-list-item>
+                            </v-card>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                             <v-card class="rounded-card pa-2" elevation="0">
+                                <v-list-item three-line>
+                                    <v-list-item-content>
+                                        <div class="overline mb-4 grey--text">System Status</div>
+                                        <v-list-item-title class="text-h4 font-weight-bold success--text mb-1">
+                                            Online
+                                        </v-list-item-title>
+                                    </v-list-item-content>
+                                    <v-list-item-avatar tile size="80" color="green lighten-5" class="rounded-lg">
+                                        <v-icon x-large color="success">mdi-server-network</v-icon>
+                                    </v-list-item-avatar>
+                                </v-list-item>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+
+                    <!-- Students Table -->
+                    <v-row class="mb-4">
+                        <v-col cols="12">
+                            <v-card class="rounded-card" elevation="0">
+                                <v-toolbar flat color="white" class="px-4 py-2" height="auto">
+                                    <div>
+                                        <div class="text-h6 font-weight-bold">Student List</div>
+                                        <div class="caption grey--text">Recent students</div>
+                                    </div>
+                                </v-toolbar>
+                                <v-divider></v-divider>
+                                <v-data-table
+                                    :headers="headers"
+                                    :items="students"
+                                    :loading="loading"
+                                    :items-per-page="5"
+                                    class="elevation-0"
+                                >
+                                    <template v-slot:item.student_id="{ item }">
+                                        <span class="font-weight-bold grey--text text--darken-3">#{{ item.student_id }}</span>
+                                    </template>
+                                    
+                                    <template v-slot:item.name="{ item }">
+                                        <div class="d-flex align-center py-2">
+                                            <v-avatar color="blue lighten-5" size="32" class="mr-3">
+                                                <span class="primary--text font-weight-bold text-caption">{{ item.name.charAt(0) }}</span>
+                                            </v-avatar>
+                                            <span class="font-weight-medium">{{ item.name }}</span>
+                                        </div>
+                                    </template>
+                                    
+                                    <template v-slot:item.program="{ item }">
+                                        <v-chip color="blue lighten-5" small label text-color="primary" class="font-weight-medium">
+                                            {{ item.program }}
+                                        </v-chip>
+                                    </template>
+
+                                    <template v-slot:item.actions="{ item }">
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="grey" v-bind="attrs" v-on="on" class="mr-1">
+                                                    <v-icon small>mdi-pencil</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Edit</span>
+                                        </v-tooltip>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="error" v-bind="attrs" v-on="on" @click="deleteStudent(item.id)">
+                                                    <v-icon small>mdi-delete</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Delete</span>
+                                        </v-tooltip>
+                                    </template>
+
+                                    <template v-slot:no-data>
+                                        <div class="pa-8 text-center grey--text">
+                                            <v-icon size="64" color="grey lighten-2">mdi-account-off</v-icon>
+                                            <div class="mt-2 text-body-1">No students found</div>
+                                        </div>
+                                    </template>
+                                </v-data-table>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+
+                    <!-- Courses Table -->
+                    <v-row>
+                        <v-col cols="12">
+                            <v-card class="rounded-card" elevation="0">
+                                <v-toolbar flat color="white" class="px-4 py-2" height="auto">
+                                    <div>
+                                        <div class="text-h6 font-weight-bold">Course List</div>
+                                        <div class="caption grey--text">Available courses</div>
+                                    </div>
+                                </v-toolbar>
+                                <v-divider></v-divider>
+                                <v-data-table
+                                    :headers="courseHeaders"
+                                    :items="courses"
+                                    :loading="loading"
+                                    class="elevation-0"
+                                >
+                                    <template v-slot:item.course_code="{ item }">
+                                        <span class="font-weight-bold primary--text">#{{ item.course_code }}</span>
+                                    </template>
+                                    <template v-slot:item.actions="{ item }">
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="grey" v-bind="attrs" v-on="on" class="mr-1">
+                                                    <v-icon small>mdi-pencil</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Edit</span>
+                                        </v-tooltip>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="error" v-bind="attrs" v-on="on" @click="deleteCourse(item.id)">
+                                                    <v-icon small>mdi-delete</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Delete</span>
+                                        </v-tooltip>
+                                    </template>
+                                    <template v-slot:no-data>
+                                        <div class="pa-8 text-center grey--text">
+                                            <v-icon size="64" color="grey lighten-2">mdi-book-off</v-icon>
+                                            <div class="mt-2 text-body-1">No courses found</div>
+                                        </div>
+                                    </template>
+                                </v-data-table>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                    </div>
+
+                    <!-- Students Page -->
+                    <div v-if="selectedItem === 1">
+                        <v-row>
+                            <v-col cols="12">
+                                <v-card class="rounded-card" elevation="0">
+                                <v-toolbar flat color="white" class="px-4 py-2" height="auto">
+                                    <div>
+                                        <div class="text-h6 font-weight-bold">Student List</div>
+                                        <div class="caption grey--text">Manage student records</div>
+                                    </div>
+                                    <v-spacer></v-spacer>
+                                    <v-text-field
+                                        v-model="search"
+                                        prepend-inner-icon="mdi-magnify"
+                                        label="Search..."
+                                        single-line
+                                        hide-details
+                                        outlined
+                                        dense
+                                        class="mr-4"
+                                        style="max-width: 250px"
+                                        background-color="grey lighten-5"
+                                    ></v-text-field>
+                                    <v-btn color="primary" depressed  class="px-6" @click="dialog = true">
+                                        <v-icon left>mdi-plus</v-icon> Add Student
+                                    </v-btn>
+                                </v-toolbar>
+                                <v-divider></v-divider>
+                                <v-data-table
+                                    :headers="headers"
+                                    :items="students"
+                                    :search="search"
+                                    :loading="loading"
+                                    class="elevation-0"
+                                >
+                                    <template v-slot:item.student_id="{ item }">
+                                        <span class="font-weight-bold grey--text text--darken-3">#{{ item.student_id }}</span>
+                                    </template>
+                                    
+                                    <template v-slot:item.name="{ item }">
+                                        <div class="d-flex align-center py-2">
+                                            <v-avatar color="blue lighten-5" size="32" class="mr-3">
+                                                <span class="primary--text font-weight-bold text-caption">{{ item.name.charAt(0) }}</span>
+                                            </v-avatar>
+                                            <span class="font-weight-medium">{{ item.name }}</span>
+                                        </div>
+                                    </template>
+                                    
+                                    <template v-slot:item.program="{ item }">
+                                        <v-chip color="blue lighten-5" small label text-color="primary" class="font-weight-medium">
+                                            {{ item.program }}
+                                        </v-chip>
+                                    </template>
+
+                                    <template v-slot:item.actions="{ item }">
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="grey" v-bind="attrs" v-on="on" class="mr-1">
+                                                    <v-icon small>mdi-pencil</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Edit</span>
+                                        </v-tooltip>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="error" v-bind="attrs" v-on="on" @click="deleteStudent(item.id)">
+                                                    <v-icon small>mdi-delete</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Delete</span>
+                                        </v-tooltip>
+                                    </template>
+                                    
+                                    <template v-slot:no-data>
+                                        <div class="pa-8 text-center grey--text">
+                                            <v-icon size="64" color="grey lighten-2">mdi-account-off</v-icon>
+                                            <div class="mt-2 text-body-1">No students found</div>
+                                            <v-btn text color="primary" class="mt-2" @click="dialog = true">Add your first student</v-btn>
+                                        </div>
+                                    </template>
+                                </v-data-table>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                    </div>
+
+                    <!-- Courses Page -->
+                    <div v-if="selectedItem === 2">
+                        <v-row>
+                            <v-col cols="12">
+                            <v-card class="rounded-card" elevation="0">
+                                <v-toolbar flat color="white" class="px-4 py-2" height="auto">
+                                    <div>
+                                        <div class="text-h6 font-weight-bold">Course List</div>
+                                        <div class="caption grey--text">Manage course records</div>
+                                    </div>
+                                    <v-spacer></v-spacer>
+                                    <v-text-field
+                                        v-model="courseSearch"
+                                        prepend-inner-icon="mdi-magnify"
+                                        label="Search..."
+                                        single-line
+                                        hide-details
+                                        outlined
+                                        dense
+                                        class="mr-4"
+                                        style="max-width: 250px"
+                                        background-color="grey lighten-5"
+                                    ></v-text-field>
+                                    <v-btn color="primary" depressed class="px-6" @click="courseDialog = true">
+                                        <v-icon left>mdi-plus</v-icon> Add Course
+                                    </v-btn>
+                                </v-toolbar>
+                                <v-divider></v-divider>
+                                <v-data-table
+                                    :headers="courseHeaders"
+                                    :items="courses"
+                                    :search="courseSearch"
+                                    :loading="loading"
+                                    class="elevation-0"
+                                >
+                                    <template v-slot:item.course_code="{ item }">
+                                        <span class="font-weight-bold primary--text">#{{ item.course_code }}</span>
+                                    </template>
+                                    <template v-slot:item.actions="{ item }">
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="grey" v-bind="attrs" v-on="on" class="mr-1">
+                                                    <v-icon small>mdi-pencil</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Edit</span>
+                                        </v-tooltip>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn icon small color="error" v-bind="attrs" v-on="on" @click="deleteCourse(item.id)">
+                                                    <v-icon small>mdi-delete</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Delete</span>
+                                        </v-tooltip>
+                                    </template>
+                                    <template v-slot:no-data>
+                                        <div class="pa-8 text-center grey--text">
+                                            <v-icon size="64" color="grey lighten-2">mdi-book-off</v-icon>
+                                            <div class="mt-2 text-body-1">No courses found</div>
+                                            <v-btn text color="primary" class="mt-2" @click="courseDialog = true">Add your first course</v-btn>
+                                        </div>
+                                    </template>
+                                </v-data-table>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                    </div>
+                </v-container>
+            </v-main>
+
+            <!-- Add Student Dialog -->
+            <v-dialog v-model="dialog" max-width="500px">
+                <v-card class="rounded-lg">
+                    <v-card-title class="pa-4 pl-6 border-bottom grey lighten-5">
+                       <span class="text-h6 font-weight-bold">New Student</span>
+                    </v-card-title>
+                    <v-divider></v-divider>
+                    <v-card-text class="pa-6">
+                        <v-alert type="info" text dense class="mb-4">
+                            Please enter valid student information. ID must be unique.
+                        </v-alert>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="form.student_id"
+                                    label="Student ID"
+                                    outlined
+                                    dense
+                                    placeholder="e.g. 1001"
+                                    hide-details="auto"
+                                    class="mb-3"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="form.name"
+                                    label="Full Name"
+                                    outlined
+                                    dense
+                                    placeholder="e.g. Gan"
+                                    hide-details="auto"
+                                    class="mb-3"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="form.email"
+                                    label="Email Address"
+                                    outlined
+                                    dense
+                                    placeholder="e.g. student@mmu.edu.my"
+                                    hide-details="auto"
+                                    class="mb-3"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-select
+                                    v-model="form.program"
+                                    :items="courseNames"
+                                    label="Program"
+                                    outlined
+                                    dense
+                                    hide-details="auto"
+                                ></v-select>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                    <v-divider></v-divider>
+                    <v-card-actions class="pa-4">
+                        <v-spacer></v-spacer>
+                        <v-btn text color="grey darken-1" @click="dialog = false" class="px-4">Cancel</v-btn>
+                        <v-btn color="primary" depressed @click="addStudent" :loading="loading" class="px-6">Save Record</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+
+            <!-- Add Course Dialog -->
+            <v-dialog v-model="courseDialog" max-width="500px">
+                <v-card class="rounded-lg">
+                    <v-card-title class="pa-4 pl-6 border-bottom grey lighten-5">
+                       <span class="text-h6 font-weight-bold">New Course</span>
+                    </v-card-title>
+                    <v-divider></v-divider>
+                    <v-card-text class="pa-6">
+                        <v-alert type="info" text dense class="mb-4">
+                            Please enter valid course information. Code must be unique.
+                        </v-alert>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="courseForm.course_code"
+                                    label="Course Code"
+                                    outlined
+                                    dense
+                                    placeholder="e.g. CS101"
+                                    hide-details="auto"
+                                    class="mb-3"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="courseForm.course_name"
+                                    label="Course Name"
+                                    outlined
+                                    dense
+                                    placeholder="e.g. Database Security"
+                                    hide-details="auto"
+                                    class="mb-3"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="courseForm.credits"
+                                    label="Credits"
+                                    outlined
+                                    dense
+                                    type="number"
+                                    placeholder="e.g. 3"
+                                    hide-details="auto"
+                                    class="mb-3"
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                    <v-divider></v-divider>
+                    <v-card-actions class="pa-4">
+                        <v-spacer></v-spacer>
+                        <v-btn text color="grey darken-1" @click="courseDialog = false" class="px-4">Cancel</v-btn>
+                        <v-btn color="primary" depressed @click="addCourse" :loading="loading" class="px-6">Save Record</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+
+            <!-- Snackbar -->
+            <v-snackbar v-model="snackbar.show" :color="snackbar.color" top right>
+                <v-icon left color="white">mdi-check-circle</v-icon>
+                {{ snackbar.text }}
+            </v-snackbar>
+        </v-app>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.7.1/dist/vuetify.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VPC and Subnet Configuration for Student Info Application'
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: '10.0.0.0/16'
+    Description: CIDR block for VPC
+  
+  PublicSubnetCidr:
+    Type: String
+    Default: '10.0.1.0/24'
+    Description: CIDR block for public subnet AZ1
+  
+  PublicSubnetAz2Cidr:
+    Type: String
+    Default: '10.0.5.0/24'
+    Description: CIDR block for public subnet AZ2
+  
+  PrivateAppAz1Cidr:
+    Type: String
+    Default: '10.0.2.0/24'
+    Description: CIDR block for private app subnet AZ1
+  
+  PrivateAppAz2Cidr:
+    Type: String
+    Default: '10.0.3.0/24'
+    Description: CIDR block for private app subnet AZ2
+  
+  PrivateDbAz1Cidr:
+    Type: String
+    Default: '10.0.4.0/24'
+    Description: CIDR block for private DB subnet AZ1
+  
+  PrivateDbAz2Cidr:
+    Type: String
+    Default: '10.0.6.0/24'
+    Description: CIDR block for private DB subnet AZ2
+
+Resources:
+  # VPC
+  StudentVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: student-vpc
+
+  # Public Subnets
+  PublicSubnetAz1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StudentVpc
+      CidrBlock: !Ref PublicSubnetCidr
+      AvailabilityZone: us-east-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-az1
+
+  PublicSubnetAz2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StudentVpc
+      CidrBlock: !Ref PublicSubnetAz2Cidr
+      AvailabilityZone: us-east-1b
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: public-subnet-az2
+
+  # Private Application Subnets
+  PrivateAppSubnetAz1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StudentVpc
+      CidrBlock: !Ref PrivateAppAz1Cidr
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: private-app-subnet-az1
+
+  PrivateAppSubnetAz2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StudentVpc
+      CidrBlock: !Ref PrivateAppAz2Cidr
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: private-app-subnet-az2
+
+  # Private Database Subnets
+  PrivateDbSubnetAz1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StudentVpc
+      CidrBlock: !Ref PrivateDbAz1Cidr
+      AvailabilityZone: us-east-1a
+      Tags:
+        - Key: Name
+          Value: private-db-subnet-az1
+
+  PrivateDbSubnetAz2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref StudentVpc
+      CidrBlock: !Ref PrivateDbAz2Cidr
+      AvailabilityZone: us-east-1b
+      Tags:
+        - Key: Name
+          Value: private-db-subnet-az2
+
+  # Internet Gateway
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: student-igw
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref StudentVpc
+      InternetGatewayId: !Ref InternetGateway
+
+  # Route Tables
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref StudentVpc
+      Tags:
+        - Key: Name
+          Value: public-rt
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociationAz1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetAz1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetRouteTableAssociationAz2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetAz2
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref StudentVpc
+      Tags:
+        - Key: Name
+          Value: private-rt
+
+  PrivateAppSubnetRouteTableAssociationAz1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetAz1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateAppSubnetRouteTableAssociationAz2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetAz2
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateDbSubnetRouteTableAssociationAz1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDbSubnetAz1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateDbSubnetRouteTableAssociationAz2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDbSubnetAz2
+      RouteTableId: !Ref PrivateRouteTable
+
+Outputs:
+  VpcId:
+    Description: VPC ID
+    Value: !Ref StudentVpc
+    Export:
+      Name: StudentVpcId
+
+  PublicSubnetAz1Id:
+    Description: Public Subnet AZ1 ID
+    Value: !Ref PublicSubnetAz1
+    Export:
+      Name: PublicSubnetAz1Id
+
+  PublicSubnetAz2Id:
+    Description: Public Subnet AZ2 ID
+    Value: !Ref PublicSubnetAz2
+    Export:
+      Name: PublicSubnetAz2Id
+
+  PrivateAppSubnetAz1Id:
+    Description: Private App Subnet AZ1 ID
+    Value: !Ref PrivateAppSubnetAz1
+    Export:
+      Name: PrivateAppSubnetAz1Id
+
+  PrivateAppSubnetAz2Id:
+    Description: Private App Subnet AZ2 ID
+    Value: !Ref PrivateAppSubnetAz2
+    Export:
+      Name: PrivateAppSubnetAz2Id
+
+  PrivateDbSubnetAz1Id:
+    Description: Private DB Subnet AZ1 ID
+    Value: !Ref PrivateDbSubnetAz1
+    Export:
+      Name: PrivateDbSubnetAz1Id
+
+  PrivateDbSubnetAz2Id:
+    Description: Private DB Subnet AZ2 ID
+    Value: !Ref PrivateDbSubnetAz2
+    Export:
+      Name: PrivateDbSubnetAz2Id

@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Application Load Balancer for Student Info Application'
+
+Parameters:
+  VpcId:
+    Type: String
+    Description: VPC ID
+    Default: 'vpc-xxx'
+  
+  PublicSubnetAz1Id:
+    Type: String
+    Description: Public Subnet AZ1 ID
+    Default: 'subnet-xxx'
+  
+  PublicSubnetAz2Id:
+    Type: String
+    Description: Public Subnet AZ2 ID
+    Default: 'subnet-xxx'
+  
+  AlbSecurityGroupId:
+    Type: String
+    Description: ALB Security Group ID
+    Default: 'sg-xxx'
+
+Resources:
+  # Application Load Balancer
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: student-app-alb
+      Type: application
+      Scheme: internet-facing
+      IpAddressType: ipv4
+      Subnets:
+        - !Ref PublicSubnetAz1Id
+        - !Ref PublicSubnetAz2Id
+      SecurityGroups:
+        - !Ref AlbSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: student-app-alb
+
+  # Target Group
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: student-app-tg
+      Port: 80
+      Protocol: HTTP
+      VpcId: !Ref VpcId
+      TargetType: instance
+      HealthCheckEnabled: true
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Tags:
+        - Key: Name
+          Value: student-app-tg
+
+  # HTTP Listener (redirect to HTTPS or serve directly)
+  HttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+Outputs:
+  LoadBalancerArn:
+    Description: ARN of the Application Load Balancer
+    Value: !GetAtt ApplicationLoadBalancer.LoadBalancerArn
+    Export:
+      Name: AlbArn
+
+  LoadBalancerDnsName:
+    Description: DNS name of the Application Load Balancer
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: AlbDnsName
+
+  TargetGroupArn:
+    Description: ARN of the Target Group
+    Value: !GetAtt TargetGroup.TargetGroupArn
+    Export:
+      Name: TargetGroupArn
+
+  LoadBalancerId:
+    Description: Load Balancer ID
+    Value: !Ref ApplicationLoadBalancer
+    Export:
+      Name: LoadBalancerId
