@@ -62,7 +62,7 @@ sudo git clone https://github.com/rygan-1220/student-information-system .
 
 # Configure Apache environment variables
 cat > /etc/httpd/conf.d/env_vars.conf << 'EOF'
-SetEnv DB_HOST "student-db.cbh0nppcfvsl.us-east-1.rds.amazonaws.com"
+SetEnv DB_HOST "student-app-alb-1168035529.us-east-1.elb.amazonaws.com"
 SetEnv DB_NAME "studentdb"
 SetEnv DB_USER "admin"
 SetEnv DB_PASSWORD "StudentInfoAdmin#123"
